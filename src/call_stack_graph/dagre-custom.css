@@ -1,12 +1,18 @@
+.my-node {
+  opacity: 0.5 !important;
+  fill: #eee;
+}
 .my-node:hover {
   opacity: 1.0 !important;
 }
 
-.my-node {
-  opacity: 0.1 !important;
-  fill: #eee;
+.my-node .label {
+  opacity: 0.1;
+  fill: #000 !important;
+  text-align: left;
+  z-index: 100;
 }
 
-.my-node text {
-  fill: #000 !important;
+.my-node:hover .label {
+  opacity: 1.0;
 }

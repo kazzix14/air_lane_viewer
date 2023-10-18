@@ -84,7 +84,11 @@ export const CallStackGraph = () => {
     const nodes = findCallerNodesRecursively(rootNode!, 1, 0);
 
     graph.setNode(rootNode!, {
-      label: rootNode,
+      labelType: "html",
+      label: `<span>
+        <span style='visibility: hidden;'>${rootNode}</span>
+        <span>${rootNode}</span>
+      </span>`,
       shape: "circle",
       width: 30,
       height: 30,
@@ -114,7 +118,10 @@ export const CallStackGraph = () => {
               // color: highlight ? "red" : "blue",
               // labelColor: highlight ? "red" : "blue",
               labelType: "html",
-              label: `<div style='height: "auto"; width: "auto"'>${node.name}</div>`,
+              label: `<span>
+                <span style='visibility: hidden;'>${node.name}</span>
+                <span>${node.name}</span>
+              </span>`,
               shape: "circle",
               width: 30,
               height: 30,
@@ -138,9 +145,7 @@ export const CallStackGraph = () => {
     });
 
     if (ref.current != null) {
-      select(ref.current)
-        //.attr("transform", "translate(200, 200)")
-        .call(render, graph);
+      select(ref.current).call(render, graph);
     }
   }, [edges, hoveredNode, ref]);
   const error = useAppSelector((state) => state.callStackGraph.error);
@@ -153,6 +158,6 @@ export const CallStackGraph = () => {
   return [
     errorElement,
     <div> a </div>,
-    <svg ref={ref} style={{ height: "100vh", width: "100vw" }}></svg>,
+    <svg ref={ref} style={{ height: "6000px", width: "6000px" }}></svg>,
   ];
 };

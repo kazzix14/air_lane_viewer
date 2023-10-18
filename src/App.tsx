@@ -51,7 +51,7 @@ const App = () => {
     <div className="App">
       <textarea
         //style={{ width: "100px", height: "200px" }}
-        className="border"
+        className="border w-full h-96"
         onChange={(e) => handleTextareaChange(e, dispatch)}
       />
       <CallStackGraph></CallStackGraph>
