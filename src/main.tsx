@@ -1,10 +1,28 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App'
+import { configureStore } from "@reduxjs/toolkit";
+import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { callStackGraphSlice } from "./call_stack_graph/call_stack_graph.slice"
+import App from './app'
 import './index.css'
+
+const store = configureStore({
+  reducer: {
+    callStackGraph: callStackGraphSlice.reducer,
+  },
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+
+export type DispatchFunction = () => AppDispatch;
+export const useAppDispatch: DispatchFunction = useDispatch;
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </React.StrictMode>,
 )
