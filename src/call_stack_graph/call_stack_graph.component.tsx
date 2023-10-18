@@ -1,14 +1,8 @@
-import { useEffect } from "react";
-import { MultiDirectedGraph } from "graphology";
-import {
-  SigmaContainer,
-  useLoadGraph,
-  useRegisterEvents,
-  useSigma,
-} from "@react-sigma/core";
-import "@react-sigma/core/lib/react-sigma.min.css";
+import { createRef, useEffect, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../main";
 import { setHoveredNode, unsetHoveredNode } from "./call_stack_graph.slice";
+import dagreD3 from "dagre-d3";
+import { select } from "d3-selection";
 
 interface Node {
   depth: number;
@@ -18,19 +12,23 @@ interface Node {
   hoverNeighbor: boolean;
 }
 
-export const MyGraph = () => {
-  const loadGraph = useLoadGraph();
-  const registerEvents = useRegisterEvents();
+export const CallStackGraph = () => {
   const dispatch = useAppDispatch();
   const hoveredNode = useAppSelector(
     (state) => state.callStackGraph.hoveredNode
   );
 
   const edges = useAppSelector((state) => state.callStackGraph.edges);
+  const ref = createRef<SVGSVGElement>();
 
   useEffect(() => {
-    const graph = new MultiDirectedGraph({ settings: { defaultLabelColor: "#aaa"} });
-
+    const graph = new dagreD3.graphlib.Graph({
+      directed: true,
+      multigraph: false,
+      compound: true,
+    });
+    graph.setGraph({ rankdir: "TB", ranker: "network-simplex" });
+    const render: any = new dagreD3.render();
 
     const isFirstInValue = (
       value: unknown,
@@ -84,11 +82,11 @@ export const MyGraph = () => {
 
     const nodes = findCallerNodesRecursively(rootNode!, 1, 0);
 
-    graph.addNode(rootNode!, {
-      x: 0,
-      y: 0,
+    graph.setNode(rootNode!, {
       label: rootNode,
-      size: 20,
+      shape: "circle",
+      width: 30,
+      height: 30,
     });
 
     const depths = nodes.map((node) => node.depth);
@@ -106,57 +104,38 @@ export const MyGraph = () => {
 
           if (!graph.hasNode(node.name)) {
             const biggerIndex = Math.max(index, node.indexInLayer);
-            graph.addNode(node.name, {
-              x: biggerIndex,
-              y: node.depth,
+            graph.setNode(node.name, {
+              // x: biggerIndex,
+              // y: node.depth,
+              // label: node.name,
+              // size: highlight ? 50 : 20,
+              // color: highlight ? "red" : "blue",
+              // labelColor: highlight ? "red" : "blue",
               label: node.name,
-              size: highlight ? 50 : 20,
-              color: highlight ? "red" : "blue",
-              labelColor: highlight ? "red" : "blue",
+              shape: "circle",
+              width: 30,
+              height: 30,
             });
           }
         });
     });
 
     nodes.forEach((node) => {
-      if (!graph.hasEdge(`${node.name}->${node.callee}`)) {
-        graph.addEdgeWithKey(
-          `${node.name}->${node.callee}`,
-          node.name,
-          node.callee,
-          {
-            label: `${node.name}->${node.callee}`,
-          }
-        );
+      if (!graph.hasEdge(node.name, node.callee)) {
+        graph.setEdge(node.name, node.callee, {
+          label: "", //`${node.name}->${node.callee}`,
+          style: "stroke: black; stroke-width: 1px; fill: none;",
+          arrowhead: "normal",
+          lineInterpolate: "bundle",
+          lineTension: 0.5,
+        });
       }
     });
 
-    loadGraph(graph);
-  }, [loadGraph, edges, hoveredNode]);
-
-  const sigma = useSigma();
-
-  useEffect(() => {});
-
-  useEffect(() => {
-    registerEvents({
-      enterNode: (e) => {
-        dispatch(setHoveredNode(e.node));
-        //setDraggedNode(e.node);
-        //sigma.getGraph().setNodeAttribute(e.node, "highlighted", true);
-      },
-      leaveNode: (e) => {
-        dispatch(unsetHoveredNode());
-        //setDraggedNode(e.node);
-        //sigma.getGraph().setNodeAttribute(e.node, "highlighted", false);
-      },
-    });
-  }, [registerEvents, sigma]);
-
-  return null;
-};
-
-export const CallStackGraph = () => {
+    if (ref.current != null) {
+      select(ref.current).call(render, graph);
+    }
+  }, [edges, hoveredNode, ref]);
   const error = useAppSelector((state) => state.callStackGraph.error);
   let errorElement = null;
 
@@ -166,11 +145,7 @@ export const CallStackGraph = () => {
 
   return [
     errorElement,
-    <SigmaContainer
-      graph={MultiDirectedGraph}
-      className="border"
-      style={{ height: "1500px", width: "1500px", padding: "32px" }}>
-      <MyGraph />
-    </SigmaContainer>,
+    <div> a </div>,
+    <svg ref={ref} style={{ height: "100vh", width: "100vw" }}></svg>,
   ];
 };
