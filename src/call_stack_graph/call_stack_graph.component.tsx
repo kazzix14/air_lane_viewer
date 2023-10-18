@@ -16,10 +16,10 @@ interface Node {
 export const CallStackGraph = () => {
   const dispatch = useAppDispatch();
   const hoveredNode = useAppSelector(
-    (state) => state.callStackGraph.hoveredNode
+    (state) => state.callStackGraphReducer.hoveredNode
   );
 
-  const edges = useAppSelector((state) => state.callStackGraph.edges);
+  const edges = useAppSelector((state) => state.callStackGraphReducer.edges);
   const ref = createRef<SVGSVGElement>();
 
   useEffect(() => {
@@ -148,16 +148,17 @@ export const CallStackGraph = () => {
       select(ref.current).call(render, graph);
     }
   }, [edges, hoveredNode, ref]);
-  const error = useAppSelector((state) => state.callStackGraph.error);
+  const error = useAppSelector((state) => state.callStackGraphReducer.error);
   let errorElement = null;
 
   if (error !== null) {
-    errorElement = <p>{error}</p>;
+    errorElement = <p className="bg-red-500 w-full">
+      {error}
+    </p>;
   }
 
   return [
     errorElement,
-    <div> a </div>,
-    <svg ref={ref} style={{ height: "6000px", width: "6000px" }}></svg>,
+    <svg ref={ref} style={{ height: "6000px", width: "100%" }}></svg>,
   ];
 };

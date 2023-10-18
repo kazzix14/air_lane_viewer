@@ -5,10 +5,12 @@ import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-
 import { callStackGraphSlice } from "./call_stack_graph/call_stack_graph.slice"
 import App from './app'
 import './index.css'
+import { appSlice } from './app.slice';
 
 const store = configureStore({
   reducer: {
-    callStackGraph: callStackGraphSlice.reducer,
+    callStackGraphReducer: callStackGraphSlice.reducer,
+    appReducer: appSlice.reducer
   },
 });
 
