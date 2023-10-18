@@ -1,0 +1,12 @@
+.my-node:hover {
+  opacity: 1.0 !important;
+}
+
+.my-node {
+  opacity: 0.1 !important;
+  fill: #eee;
+}
+
+.my-node text {
+  fill: #000 !important;
+}

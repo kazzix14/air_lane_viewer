@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from "../main";
 import { setHoveredNode, unsetHoveredNode } from "./call_stack_graph.slice";
 import dagreD3 from "dagre-d3";
 import { select } from "d3-selection";
+import "./dagre-custom.css";
 
 interface Node {
   depth: number;
@@ -87,6 +88,7 @@ export const CallStackGraph = () => {
       shape: "circle",
       width: 30,
       height: 30,
+      class: "my-node",
     });
 
     const depths = nodes.map((node) => node.depth);
@@ -111,10 +113,12 @@ export const CallStackGraph = () => {
               // size: highlight ? 50 : 20,
               // color: highlight ? "red" : "blue",
               // labelColor: highlight ? "red" : "blue",
-              label: node.name,
+              labelType: "html",
+              label: `<div style='height: "auto"; width: "auto"'>${node.name}</div>`,
               shape: "circle",
               width: 30,
               height: 30,
+              class: "my-node",
             });
           }
         });
@@ -124,7 +128,8 @@ export const CallStackGraph = () => {
       if (!graph.hasEdge(node.name, node.callee)) {
         graph.setEdge(node.name, node.callee, {
           label: "", //`${node.name}->${node.callee}`,
-          style: "stroke: black; stroke-width: 1px; fill: none;",
+          class: "my-edge",
+          style: "stroke: black; stroke-width: 2px; fill: none;",
           arrowhead: "normal",
           lineInterpolate: "bundle",
           lineTension: 0.5,
@@ -133,7 +138,9 @@ export const CallStackGraph = () => {
     });
 
     if (ref.current != null) {
-      select(ref.current).call(render, graph);
+      select(ref.current)
+        //.attr("transform", "translate(200, 200)")
+        .call(render, graph);
     }
   }, [edges, hoveredNode, ref]);
   const error = useAppSelector((state) => state.callStackGraph.error);
