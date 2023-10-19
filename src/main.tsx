@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { configureStore } from "@reduxjs/toolkit";
 import { Provider, TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { callStackGraphSlice } from "./call_stack_graph/call_stack_graph.slice"
-import App from './app2'
+import App from './app'
 import './index.css'
 import { appSlice } from './app.slice';
 
