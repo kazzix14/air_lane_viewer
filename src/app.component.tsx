@@ -37,7 +37,6 @@ const handleToggleMode = (
     const textarea = event.currentTarget.querySelector("textarea")!;
     const maybeEdges = ParseEdges(textarea.value);
 
-    console.log("dispatching to view 0");
     if (maybeEdges.isOk()) {
       dispatch(setEdges(maybeEdges.value));
       dispatch(unsetError());
