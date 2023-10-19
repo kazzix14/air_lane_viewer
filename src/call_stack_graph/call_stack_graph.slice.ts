@@ -12,6 +12,7 @@ export type Edges = z.infer<typeof zEdges>;
 
 interface callStackGraphState {
   edges: Edges;
+  entrypointNodes: Array<string> | null;
   hoveredNode: string | null;
   error: string | null;
 }
@@ -20,6 +21,7 @@ export const callStackGraphSlice = createSlice({
   name: "callStackGraph",
   initialState: {
     edges: [],
+    entrypointNodes: null,
     hoveredNode: null,
     error: null,
   } as callStackGraphState,

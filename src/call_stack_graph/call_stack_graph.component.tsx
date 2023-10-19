@@ -4,6 +4,7 @@ import { setHoveredNode, unsetHoveredNode } from "./call_stack_graph.slice";
 import dagreD3 from "dagre-d3";
 import { select } from "d3-selection";
 import "./dagre-custom.css";
+import { uniquifyArray } from "../util";
 
 interface Node {
   depth: number;
@@ -22,6 +23,10 @@ export const CallStackGraph = () => {
   const edges = useAppSelector((state) => state.callStackGraphReducer.edges);
   const ref = createRef<SVGSVGElement>();
 
+  const uniqueNodeNames = uniquifyArray(
+    edges.flatMap((edge) => [edge.caller, edge.callee])
+  );
+
   useEffect(() => {
     const graph = new dagreD3.graphlib.Graph({
       directed: true,
@@ -38,9 +43,6 @@ export const CallStackGraph = () => {
     ) => {
       return array.indexOf(value) === index;
     };
-
-    const nodeNames = edges.flatMap((edge) => [edge.caller, edge.callee]);
-    const uniqueNodeNames = nodeNames.filter(isFirstInValue);
 
     // calleeからcallerを辿る
     // callerになっていないやつを探す
@@ -111,12 +113,6 @@ export const CallStackGraph = () => {
           if (!graph.hasNode(node.name)) {
             const biggerIndex = Math.max(index, node.indexInLayer);
             graph.setNode(node.name, {
-              // x: biggerIndex,
-              // y: node.depth,
-              // label: node.name,
-              // size: highlight ? 50 : 20,
-              // color: highlight ? "red" : "blue",
-              // labelColor: highlight ? "red" : "blue",
               labelType: "html",
               label: `<span>
                 <span style='visibility: hidden;'>${node.name}</span>
@@ -148,17 +144,13 @@ export const CallStackGraph = () => {
       select(ref.current).call(render, graph);
     }
   }, [edges, hoveredNode, ref]);
+
   const error = useAppSelector((state) => state.callStackGraphReducer.error);
   let errorElement = null;
 
   if (error !== null) {
-    errorElement = <p className="bg-red-500 w-full">
-      {error}
-    </p>;
+    errorElement = <p className="bg-red-500 w-full">{error}</p>;
   }
 
-  return [
-    errorElement,
-    <svg ref={ref} style={{ height: "6000px", width: "100%" }}></svg>,
-  ];
+  return [errorElement, <svg ref={ref} style={{ overflow: "visible" }}></svg>];
 };

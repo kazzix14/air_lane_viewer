@@ -13,3 +13,7 @@ export const safeParseJson = (text: string): Result<unknown, SyntaxError> => {
     }
   }
 };
+
+export const uniquifyArray = <T>(arr: Array<T>): Array<T> => {
+  return Array.from(new Set(arr));
+}

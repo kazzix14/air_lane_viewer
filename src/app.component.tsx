@@ -7,7 +7,7 @@ import {
 } from "./call_stack_graph/call_stack_graph.slice";
 import { zEdges, Edges } from "./call_stack_graph/call_stack_graph.slice";
 import { Result, ok, err } from "neverthrow";
-import { safeParseJson } from "./json";
+import { safeParseJson, uniquifyArray } from "./util";
 import { enterEditMode, enterViewMode } from "./app.slice";
 
 interface IToString {
@@ -46,10 +46,8 @@ const handleToggleMode = (
       dispatch(setError(maybeEdges.error.toString()));
     }
 
-    console.log("dispatching to view");
     dispatch(enterViewMode());
   } else if (currentMode === "view") {
-    console.log("dispatching to edit");
     dispatch(enterEditMode());
   }
 
@@ -60,29 +58,48 @@ const handleToggleMode = (
 const App = () => {
   const dispatch = useAppDispatch();
   const currentMode = useAppSelector((state) => state.appReducer.mode);
-  console.log(currentMode);
+
+  const edges = useAppSelector((state) => state.callStackGraphReducer.edges);
+  const uniqueNodeNames = uniquifyArray(
+    edges.flatMap((edge) => [edge.caller, edge.callee])
+  );
+
+  const entrypointNodes = uniqueNodeNames.filter((nodeName) => {
+    return !edges.some((edge) => edge.callee === nodeName);
+  });
 
   if (currentMode === "edit") {
     return (
-      <div className="App">
+      <div>
         <h1 className="text-2xl">Air Lane Viewer</h1>
         <form
           className="w-32"
           onSubmit={(e) => handleToggleMode(e, dispatch, currentMode)}>
           <textarea className="border w-full h-full" />
-          <input type="submit" value="view" />
+          <input type="submit" value="view" className="border cursor-pointer"/>
         </form>
       </div>
     );
   } else if (currentMode === "view") {
     return (
-      <div className="App">
+      <div>
         <h1 className="text-2xl">Air Lane Viewer</h1>
         <form onSubmit={(e) => handleToggleMode(e, dispatch, currentMode)}>
-          <input type="submit" value="back" />
+          <input type="submit" value="back" className="border cursor-pointer"/>
         </form>
-        <div className="w-full">
-          <CallStackGraph></CallStackGraph>
+        <div className="flex">
+          <div className="w-full">
+            <h2 className="text-xl">Call Stack</h2>
+            <CallStackGraph></CallStackGraph>
+          </div>
+          <div className="w-full">
+            <h2 className="text-xl">Entrypoints</h2>
+            <ol>
+              {entrypointNodes.map((entrypointNode) => {
+                return <li key={entrypointNode}>{entrypointNode}</li>;
+              })}
+            </ol>
+          </div>
         </div>
       </div>
     );
